@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.forms import Textarea
-from .models import CustomUser
+from .models import CustomUser, Follow
 
 
 class UserAdminConfig(UserAdmin):
@@ -30,3 +30,4 @@ class UserAdminConfig(UserAdmin):
 
 
 admin.site.register(CustomUser, UserAdminConfig)
+admin.site.register(Follow)

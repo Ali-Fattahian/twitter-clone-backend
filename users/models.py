@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
@@ -20,7 +21,8 @@ class CustomAccountManager(BaseUserManager):
     def create_user(self, email, username, firstname, lastname, password, **kwargs):
         required_fields = (email, username, firstname, lastname, password)
 
-        if not (email and username and firstname and lastname and password): # All of the fields should be provided(True)
+        # All of the fields should be provided(True)
+        if not (email and username and firstname and lastname and password):
             raise ValueError(_('The fields must not be empty.'))
 
         email = self.normalize_email(email)
@@ -49,3 +51,21 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f'Username: {self.username} | Email: {self.email}'
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        get_user_model(), on_delete=models.CASCADE, related_name='followers')
+    follower = models.ForeignKey(
+        get_user_model(), on_delete=models.CASCADE, related_name='follows')
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=~models.Q(user=models.F(
+                'follower')), name='user and follower fields can not be the same.'),
+            models.UniqueConstraint(fields=[
+                                    'user', 'follower'], name='Can\'t follow the same user more than once')
+        ]
+
+    def __str__(self):
+        return f'User {self.follower.username} followed {self.user.username}'

@@ -1,5 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
+from .models import Follow
 
 
 class TestNewSuperUser(TestCase):
@@ -77,3 +79,31 @@ class TestNewCustomUser(TestCase):
         with self.assertRaises(ValueError):
             self.new_super_user = get_user_model().objects.create_superuser(email='test2@gmail.com', username='test_username2',
                                                                             firstname='test_firstname2', lastname='test_lastname2', password='')
+
+
+class TestFollow(TestCase):
+    def setUp(self):
+        self.new_user1 = get_user_model().objects.create_user(email='test@gmail.com', username='test_username',
+                                                              firstname='test_firstname', lastname='test_lastname', password='test_password')
+        self.new_user2 = get_user_model().objects.create_user(email='test2@gmail.com', username='test_username2',
+                                                              firstname='test_firstname2', lastname='test_lastname2', password='test_password2')
+
+        self.follow1 = Follow.objects.create(
+            user=self.new_user1, follower=self.new_user2)
+        self.follow2 = Follow.objects.create(
+            user=self.new_user2, follower=self.new_user1)
+
+    def test_follow_works(self):
+        """Test both users can follow each other"""
+        self.assertIsInstance(self.follow1, Follow)
+        self.assertIsInstance(self.follow2, Follow)
+
+    def test_same_user_follow_not_valid(self):
+        """Test a follow object with the same user for both fields is not possible"""
+        with self.assertRaises(IntegrityError):
+            Follow.objects.create(user=self.new_user1, follower=self.new_user1)
+
+    def test_same_user_follow_not_valid(self):
+        """Test a user can't follow the other user more than once"""
+        with self.assertRaises(IntegrityError):
+            Follow.objects.create(user=self.new_user1, follower=self.new_user2)        
