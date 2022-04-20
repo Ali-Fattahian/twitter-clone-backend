@@ -3,10 +3,13 @@ from django.contrib.auth import get_user_model
 
 
 class Tweet(models.Model):
-    content = models.CharField(max_length=300)
+    content = models.TextField(max_length=300) #Make this required on the view
     date_created = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, related_name='tweets')
+
+    def __str__(self):
+        return f'tweet {self.id} by {self.user.username}'
 
 
 class Like(models.Model):
@@ -22,16 +25,22 @@ class Like(models.Model):
             )
         ]
 
+    def __str__(self):
+        return f'{self.user.username} liked tweet {self.tweet.id} by {self.tweet.user.username}'
+
 
 class Reply(models.Model):
-    text = models.TextField(max_length=200)
+    text = models.TextField(max_length=200) #Make this required on the view
     user = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, related_name='replies')
     tweet = models.ForeignKey(
         Tweet, on_delete=models.CASCADE, related_name='replies')
 
+    def __str__(self):
+        return f'reply to {self.tweet.user.username} tweet by {self.user.username}'
 
 # class Retweet()
+
 
 class SaveTweet(models.Model):
     user = models.ForeignKey(
@@ -44,3 +53,6 @@ class SaveTweet(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'tweet'], name='You can\'t save the same post more than once'),
         ]
+
+    def __str__(self):
+        return f'{self.user.username} saved {self.tweet.id} tweet by {self.tweet.user.username}'
