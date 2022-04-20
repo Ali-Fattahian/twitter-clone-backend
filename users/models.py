@@ -18,13 +18,15 @@ class CustomAccountManager(BaseUserManager):
         return self.create_user(email, username, firstname, lastname, password, **kwargs)
 
     def create_user(self, email, username, firstname, lastname, password, **kwargs):
-        if not email:
-            raise ValueError(_('You must provide an email address'))
+        required_fields = (email, username, firstname, lastname, password)
+
+        if not (email and username and firstname and lastname and password): # All of the fields should be provided(True)
+            raise ValueError(_('The fields must not be empty.'))
 
         email = self.normalize_email(email)
         user = self.model(email=email, username=username,
                           firstname=firstname, lastname=lastname, **kwargs)
-        user.set_password = password
+        user.set_password(password)
         user.save()
         return user
 
