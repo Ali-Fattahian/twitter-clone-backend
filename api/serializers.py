@@ -25,11 +25,13 @@ class LikeSerializer(serializers.ModelSerializer):
 
 class TweetSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
+    firstname = serializers.ReadOnlyField(source='user.firstname')
+    lastname = serializers.ReadOnlyField(source='user.lastname')
     likes = LikeSerializer(many=True, read_only=True)
 
     class Meta:
         model = Tweet
-        fields = ('id', 'content', 'date_created', 'user', 'likes')
+        fields = ('id', 'content', 'date_created', 'user', 'firstname', 'lastname', 'likes')
 
 
 class SaveTweetSerializer(serializers.ModelSerializer):
