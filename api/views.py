@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, filters
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta, timezone
 
@@ -31,6 +31,19 @@ class HomePageView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)            
+
+
+class TweetListSearchResults(generics.ListAPIView):
+    serializer_class = TweetSerializer
+    search_fields = ['content']
+    filter_backends = (filters.SearchFilter, )
+    queryset = Tweet.objects.all()
+
+class UserListSearchResults(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+    search_fields = ['username', 'firstname', 'lastname', 'bio']
+    filter_backends = (filters.SearchFilter, )
+    queryset = get_user_model().objects.all()
 
 
 class ExploreView(generics.ListAPIView):
