@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 import datetime
 from core.models import Tweet, Like, SaveTweet
+from users.models import Follow
 from .utils import  datetime_subtractor
 
 
@@ -24,6 +25,12 @@ class LikeSerializer(serializers.ModelSerializer):
         model = Like
         fields = ('id', 'tweet', 'user')
 
+class FollowSerializer(serializers.ModelSerializer):
+    follower = serializers.ReadOnlyField(source='follower.username')
+
+    class Meta:
+        model = Follow
+        fields = ('id', 'user', 'follower')
 
 class TweetSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')

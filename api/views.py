@@ -2,7 +2,7 @@ from rest_framework import generics, permissions, filters
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta, timezone
 
-from .serializers import UserSignUpSerializer, TweetSerializer, SaveTweetSerializer, ProfileSerializer
+from .serializers import UserSignUpSerializer, TweetSerializer, SaveTweetSerializer, ProfileSerializer, FollowSerializer
 from core.models import Tweet, SaveTweet
 from users.models import Follow
 from .utils import OnlySameUserCanEditMixin
@@ -22,15 +22,17 @@ class HomePageView(generics.ListCreateAPIView):
             following_users = []
             tweets = Tweet.objects.none()
             follows = Follow.objects.filter(follower=self.request.user)
-            for follow in follows :
-                following_users.append(follow.user) # now we have all the following users
+            for follow in follows:
+                # now we have all the following users
+                following_users.append(follow.user)
             for following_user in following_users:
-                tweets = Tweet.objects.filter(user=following_user) | tweets # now we have all the tweets from those users
+                # now we have all the tweets from those users
+                tweets = Tweet.objects.filter(user=following_user) | tweets
             return tweets.order_by('-date_created')
         return Tweet.objects.all().order_by('-date_created')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)            
+        serializer.save(user=self.request.user)
 
 
 class TweetListSearchResults(generics.ListAPIView):
@@ -38,6 +40,7 @@ class TweetListSearchResults(generics.ListAPIView):
     search_fields = ['content']
     filter_backends = (filters.SearchFilter, )
     queryset = Tweet.objects.all()
+
 
 class UserListSearchResults(generics.ListAPIView):
     serializer_class = ProfileSerializer
@@ -50,7 +53,8 @@ class ExploreView(generics.ListAPIView):
     serializer_class = TweetSerializer
     now = datetime.now(timezone.utc)
     yesterday = now - timedelta(days=1)
-    queryset = Tweet.objects.filter(date_created__gte=yesterday) # Show the tweets from the last 24 hours
+    # Show the tweets from the last 24 hours
+    queryset = Tweet.objects.filter(date_created__gte=yesterday)
 
 
 class BookMarksView(generics.ListAPIView):
@@ -58,7 +62,25 @@ class BookMarksView(generics.ListAPIView):
     serializer_class = SaveTweetSerializer
 
     def get_queryset(self):
-        return SaveTweet.objects.filter(user=self.request.user) # Returns all the savetweet objects
+        # Returns all the savetweet objects
+        return SaveTweet.objects.filter(user=self.request.user)
+
+
+class UserFollowView(generics.CreateAPIView):
+    queryset = Follow.objects.all()
+    serializer_class = FollowSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(follower=self.request.user)
+
+
+class UserUnfollowView(generics.DestroyAPIView):
+    serializer_class = FollowSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Follow.objects.filter(follower=self.request.user)
 
 
 class ProfileView(generics.RetrieveUpdateAPIView):
@@ -75,4 +97,3 @@ class AddTweetView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-        
