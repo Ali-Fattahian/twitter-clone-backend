@@ -30,7 +30,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         followings = []
         for following_obj in followings_objs:
             followings.append(following_obj.user.username)
-        return {'followings': followings, 'followers': followers, 'followings_count': len(followings), 'followers_count': len(followers)}
+        return {'followings_count': len(followings), 'followers_count': len(followers)}
 
 
     class Meta:

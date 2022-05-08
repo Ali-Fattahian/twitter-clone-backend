@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, filters
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta, timezone
@@ -71,17 +72,17 @@ class SuggestedUsersView(generics.ListAPIView):
     serializer_class = ProfileSerializer
 
     def get_queryset(self):
-        # if self.request.user.is_authenticated:  
+        # if self.request.user.is_authenticated:
         #     followings = self.request.user.follows
         #     print(followings)
-            # follows = Follow.objects.filter(~Q(follower=self.request.user)) # request.user is not the follower
-            # users = get_user_model().objects.filter(~Q(self.request.user__in=followers))
-            # suggests = []
-            # for follow in follows:
-            #     suggests.append(follow.user)
-            # print(suggests)
-            # return print(get_user_model().objects.exclude(user__in=followings)[:3])
-        
+        # follows = Follow.objects.filter(~Q(follower=self.request.user)) # request.user is not the follower
+        # users = get_user_model().objects.filter(~Q(self.request.user__in=followers))
+        # suggests = []
+        # for follow in follows:
+        #     suggests.append(follow.user)
+        # print(suggests)
+        # return print(get_user_model().objects.exclude(user__in=followings)[:3])
+
         return get_user_model().objects.all()[:3]
 
 
@@ -116,3 +117,29 @@ class AddTweetView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class FollowersListView(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+
+    def get_queryset(self):
+        username = self.kwargs.get('username')
+        user = get_object_or_404(get_user_model(), username=username)
+        followers_objs = user.followers.all()
+        followers = []
+        for follower_obj in followers_objs:
+            followers.append(follower_obj.follower)
+        return followers
+
+
+class FollowingsListView(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+
+    def get_queryset(self):
+        username = self.kwargs.get('username')
+        user = get_object_or_404(get_user_model(), username=username)
+        followings_objs = user.follows.all()
+        followings = []
+        for following_obj in followings_objs:
+            followings.append(following_obj.user)
+        return followings
