@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions, filters
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta, timezone
+# from django.db.models import Q
 
 from .serializers import UserSignUpSerializer, TweetSerializer, SaveTweetSerializer, ProfileSerializer, FollowSerializer
 from core.models import Tweet, SaveTweet
@@ -64,6 +65,24 @@ class BookMarksView(generics.ListAPIView):
     def get_queryset(self):
         # Returns all the savetweet objects
         return SaveTweet.objects.filter(user=self.request.user)
+
+
+class SuggestedUsersView(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+
+    def get_queryset(self):
+        # if self.request.user.is_authenticated:  
+        #     followings = self.request.user.follows
+        #     print(followings)
+            # follows = Follow.objects.filter(~Q(follower=self.request.user)) # request.user is not the follower
+            # users = get_user_model().objects.filter(~Q(self.request.user__in=followers))
+            # suggests = []
+            # for follow in follows:
+            #     suggests.append(follow.user)
+            # print(suggests)
+            # return print(get_user_model().objects.exclude(user__in=followings)[:3])
+        
+        return get_user_model().objects.all()[:3]
 
 
 class UserFollowView(generics.CreateAPIView):

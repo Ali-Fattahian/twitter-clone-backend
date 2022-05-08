@@ -19,6 +19,7 @@ urlpatterns = [
     # path('notifications', views.NotificationsView.as_view(), name='notifications'),
     # path('messages', views.MessagesView.as_view(), name='messages')  # Chat App
     path('bookmarks', views.BookMarksView.as_view(), name='bookmarks'),
+    path('suggested-users', views.SuggestedUsersView.as_view(), name='suggested-users'),
     path('follow-request/', views.UserFollowView.as_view(), name='user-follow'),
     path('profiles/<int:pk>/follow/delete', views.UserUnfollowView.as_view(), name='user-unfollow'),
     path('profiles/<str:username>', views.ProfileView.as_view(), name='profile'),

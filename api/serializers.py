@@ -7,10 +7,36 @@ from .utils import  datetime_subtractor
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    date_joined = serializers.SerializerMethodField('get_date_joined')
+    tweet_number = serializers.SerializerMethodField('get_tweet_number')
+    follows = serializers.SerializerMethodField('get_follows')
+
+    def get_date_joined(self, obj):
+        """A property that shows join date and time of a user in a usefull way"""
+        now = datetime.datetime.now()
+        now_aware = now.replace(tzinfo=datetime.timezone.utc)
+        return {'date_joined_ago': datetime_subtractor(now_aware, obj.join_date), 'date_joined': obj.join_date}
+
+    def get_tweet_number(self, obj):
+        """Get the number of tweets created by this user"""
+        return obj.tweets.all().count()
+
+    def get_follows(self, obj):
+        followers_objs = obj.followers.all()
+        followers = []
+        for follower_obj in followers_objs:
+            followers.append(follower_obj.follower.username)
+        followings_objs = obj.follows.all()
+        followings = []
+        for following_obj in followings_objs:
+            followings.append(following_obj.user.username)
+        return {'followings': followings, 'followers': followers, 'followings_count': len(followings), 'followers_count': len(followers)}
+
+
     class Meta:
         model = get_user_model()
         fields = ('id', 'email', 'username', 'firstname', 'lastname',
-                  'bio', 'join_date', 'picture')
+                  'bio', 'join_date', 'picture', 'date_joined', 'tweet_number', 'follows')
 
 
 class UserSignUpSerializer(serializers.ModelSerializer):
