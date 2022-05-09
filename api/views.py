@@ -2,6 +2,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, filters
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta, timezone
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # from django.db.models import Q
 
 from .serializers import UserSignUpSerializer, TweetSerializer, SaveTweetSerializer, ProfileSerializer, FollowSerializer
@@ -143,3 +145,19 @@ class FollowingsListView(generics.ListAPIView):
         for following_obj in followings_objs:
             followings.append(following_obj.user)
         return followings
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+
+        token['username'] = user.username
+        # ...
+
+        return token
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
