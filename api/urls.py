@@ -23,6 +23,7 @@ urlpatterns = [
     path('follow-request/', views.UserFollowView.as_view(), name='user-follow'),
     path('profiles/<int:pk>/follow/delete', views.UserUnfollowView.as_view(), name='user-unfollow'),
     path('profiles/<str:username>', views.ProfileView.as_view(), name='profile'),
+    path('follow/<str:username>/check', views.FollowCheckView.as_view(), name='follow-check'),
     path('profiles/<str:username>/followers', views.FollowersListView.as_view(), name='followers'),
     path('profiles/<str:username>/followings', views.FollowingsListView.as_view(), name='followings'),
     # # path('<str:username>/lists', views.ListsView.as_view(), name='lists'),

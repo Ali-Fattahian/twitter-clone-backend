@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, filters
+from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta, timezone
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -103,6 +104,17 @@ class UserUnfollowView(generics.DestroyAPIView):
 
     def get_queryset(self):
         return Follow.objects.filter(follower=self.request.user)
+
+
+class FollowCheckView(generics.RetrieveAPIView):
+    queryset = Follow.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FollowSerializer
+    
+    def get_object(self):
+        following_username = self.kwargs.get('username')
+        following_user = get_object_or_404(get_user_model(), username=following_username)
+        return get_object_or_404(Follow, user=following_user, follower=self.request.user)
 
 
 class ProfileView(generics.RetrieveUpdateAPIView):
