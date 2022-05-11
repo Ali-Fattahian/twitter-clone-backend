@@ -26,6 +26,9 @@ urlpatterns = [
     path('follow/<str:username>/check', views.FollowCheckView.as_view(), name='follow-check'),
     path('profiles/<str:username>/followers', views.FollowersListView.as_view(), name='followers'),
     path('profiles/<str:username>/followings', views.FollowingsListView.as_view(), name='followings'),
+    path('like-tweet/<int:tweet_id>', views.CreateLikeView.as_view(), name='create-like'),
+    path('remove-like/<int:pk>', views.DeleteLikeView.as_view(), name='delete-like'),
+    path('list-tweet-likes/<int:tweet_id>', views.ListLikeView.as_view(), name='list-like'),
     # # path('<str:username>/lists', views.ListsView.as_view(), name='lists'),
     path('compose/tweet', views.AddTweetView.as_view(), name='add_tweet'),
 ]

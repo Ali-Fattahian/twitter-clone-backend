@@ -1,16 +1,16 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, permissions, filters
-from rest_framework.views import APIView
+from rest_framework import generics, permissions, filters, status
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta, timezone
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # from django.db.models import Q
 
-from .serializers import UserSignUpSerializer, TweetSerializer, SaveTweetSerializer, ProfileSerializer, FollowSerializer
-from core.models import Tweet, SaveTweet
+from .serializers import LikeSerializer, UserSignUpSerializer, TweetSerializer, SaveTweetSerializer, ProfileSerializer, FollowSerializer
+from core.models import Tweet, SaveTweet, Like
 from users.models import Follow
 from .utils import OnlySameUserCanEditMixin
+
 
 
 class SignUpView(generics.CreateAPIView):
@@ -157,6 +157,34 @@ class FollowingsListView(generics.ListAPIView):
         for following_obj in followings_objs:
             followings.append(following_obj.user)
         return followings
+
+class CreateLikeView(generics.CreateAPIView):
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        tweet = get_object_or_404(Tweet, id=self.kwargs.get('tweet_id'))
+        serializer.save(user=self.request.user, tweet=tweet)
+
+
+class DeleteLikeView(generics.DestroyAPIView):
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def destroy(self, request, *args, **kwargs):
+        if self.get_object().user == self.request.user:
+            return super().destroy(request, *args, **kwargs)
+        return status.HTTP_401_UNAUTHORIZED
+
+
+class ListLikeView(generics.ListAPIView):
+    serializer_class = LikeSerializer
+    
+    def get_queryset(self):
+        tweet = get_object_or_404(Tweet, id=self.kwargs.get('tweet_id'))
+        return Like.objects.filter(tweet=tweet)
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):

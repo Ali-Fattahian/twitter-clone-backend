@@ -47,9 +47,12 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
 
 class LikeSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')
+    tweet = serializers.ReadOnlyField(source='tweet.id')
     class Meta:
         model = Like
         fields = ('id', 'tweet', 'user')
+        
 
 class FollowSerializer(serializers.ModelSerializer):
     follower = serializers.ReadOnlyField(source='follower.username')
