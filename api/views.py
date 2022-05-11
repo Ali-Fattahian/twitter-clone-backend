@@ -187,6 +187,17 @@ class ListLikeView(generics.ListAPIView):
         return Like.objects.filter(tweet=tweet)
 
 
+class LikeCheckView(generics.RetrieveAPIView):
+    queryset = Like.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = LikeSerializer
+    
+    def get_object(self):
+        tweet_id = self.kwargs.get('tweet_id')
+        tweet = get_object_or_404(Tweet, id=tweet_id)
+        return get_object_or_404(Like, user=self.request.user, tweet=tweet)        
+
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
