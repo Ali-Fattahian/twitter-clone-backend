@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, filters, status
+from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta, timezone
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -124,6 +125,12 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     lookup_field = 'username'
 
 
+class TweetDetailView(generics.RetrieveAPIView):
+    queryset = Tweet.objects.all()
+    serializer_class = TweetSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
 class AddTweetView(generics.CreateAPIView):
     queryset = Tweet.objects.all()
     serializer_class = TweetSerializer
@@ -176,7 +183,7 @@ class DeleteLikeView(generics.DestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         if self.get_object().user == self.request.user:
             return super().destroy(request, *args, **kwargs)
-        return status.HTTP_401_UNAUTHORIZED
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 class ListLikeView(generics.ListAPIView):
