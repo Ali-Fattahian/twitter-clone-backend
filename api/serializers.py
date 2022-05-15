@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 import datetime
-from core.models import Tweet, Like, SaveTweet
+from core.models import Tweet, Like, SaveTweet, Reply
 from users.models import Follow
 from .utils import  datetime_subtractor
 
@@ -88,3 +88,19 @@ class SaveTweetSerializer(serializers.ModelSerializer):
     class Meta:
         model = SaveTweet
         fields = ('id', 'tweet')
+
+
+class ReplySerializer(serializers.ModelSerializer):
+    user = ProfileSerializer(read_only=True)
+    tweet = serializers.ReadOnlyField(source='tweet.id')
+    date_created = serializers.SerializerMethodField('get_date_created')
+
+    def get_date_created(self, obj):
+        now = datetime.datetime.now()
+        now_aware = now.replace(tzinfo=datetime.timezone.utc)
+        return {'created_ago': datetime_subtractor(now_aware, obj.date_created), 'created': obj.date_created}
+
+    class Meta:
+        model = Reply 
+        fields = ('id', 'text', 'user', 'tweet', 'date_created')
+        

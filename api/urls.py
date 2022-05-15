@@ -33,4 +33,5 @@ urlpatterns = [
     # # path('<str:username>/lists', views.ListsView.as_view(), name='lists'),
     path('compose/tweet', views.AddTweetView.as_view(), name='add_tweet'),
     path('tweets/<int:pk>', views.TweetDetailView.as_view(), name='tweet-detail'),
+    path('tweets/<int:tweet_id>/reply', views.ListCreateReplyView.as_view(), name='list-create-reply'),
 ]

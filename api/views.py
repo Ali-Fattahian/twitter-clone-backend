@@ -7,8 +7,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # from django.db.models import Q
 
-from .serializers import LikeSerializer, UserSignUpSerializer, TweetSerializer, SaveTweetSerializer, ProfileSerializer, FollowSerializer
-from core.models import Tweet, SaveTweet, Like
+from .serializers import LikeSerializer, UserSignUpSerializer, TweetSerializer, SaveTweetSerializer, ProfileSerializer, FollowSerializer, ReplySerializer
+from core.models import Tweet, SaveTweet, Like, Reply
 from users.models import Follow
 from .utils import OnlySameUserCanEditMixin
 
@@ -202,7 +202,21 @@ class LikeCheckView(generics.RetrieveAPIView):
     def get_object(self):
         tweet_id = self.kwargs.get('tweet_id')
         tweet = get_object_or_404(Tweet, id=tweet_id)
-        return get_object_or_404(Like, user=self.request.user, tweet=tweet)        
+        return get_object_or_404(Like, user=self.request.user, tweet=tweet)   
+
+
+class ListCreateReplyView(generics.ListCreateAPIView):
+    serializer_class = ReplySerializer     
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        tweet = get_object_or_404(Tweet, id=self.kwargs.get('tweet_id'))
+        return Reply.objects.filter(tweet=tweet)
+
+
+    def perform_create(self, serializer):
+        tweet = get_object_or_404(Tweet, id=self.kwargs.get('tweet_id'))
+        serializer.save(user=self.request.user, tweet=tweet)
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):

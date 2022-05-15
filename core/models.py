@@ -39,6 +39,7 @@ class Reply(models.Model):
         get_user_model(), on_delete=models.CASCADE, related_name='replies')
     tweet = models.ForeignKey(
         Tweet, on_delete=models.CASCADE, related_name='replies')
+    date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'reply to {self.tweet.user.username} tweet by {self.user.username}'
