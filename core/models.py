@@ -44,6 +44,9 @@ class Reply(models.Model):
     def __str__(self):
         return f'reply to {self.tweet.user.username} tweet by {self.user.username}'
 
+    class Meta:
+        ordering = ['-id']
+
 # class Retweet()
 
 
