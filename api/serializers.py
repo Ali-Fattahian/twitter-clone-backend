@@ -84,10 +84,11 @@ class TweetSerializer(serializers.ModelSerializer):
 
 class SaveTweetSerializer(serializers.ModelSerializer):
     tweet = TweetSerializer(read_only=True)
+    user = serializers.ReadOnlyField(source='user.username')
 
     class Meta:
         model = SaveTweet
-        fields = ('id', 'tweet')
+        fields = ('id', 'tweet', 'user')
 
 
 class ReplySerializer(serializers.ModelSerializer):

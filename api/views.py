@@ -63,13 +63,22 @@ class ExploreView(generics.ListAPIView):
     queryset = Tweet.objects.filter(date_created__gte=yesterday)
 
 
-class BookMarksView(generics.ListAPIView):
+class BookMarksListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = SaveTweetSerializer
 
     def get_queryset(self):
         # Returns all the savetweet objects
         return SaveTweet.objects.filter(user=self.request.user)
+
+
+class BookMarksCreateView(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = SaveTweetSerializer
+
+    def perform_create(self, serializer):
+        tweet = get_object_or_404(Tweet, id=self.kwargs.get('tweet_id'))
+        serializer.save(user=self.request.user, tweet=tweet)
 
 
 class SuggestedUsersView(generics.ListAPIView):

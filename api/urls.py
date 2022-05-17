@@ -18,7 +18,6 @@ urlpatterns = [
     path('explore', views.ExploreView.as_view(), name='explore'),
     # path('notifications', views.NotificationsView.as_view(), name='notifications'),
     # path('messages', views.MessagesView.as_view(), name='messages')  # Chat App
-    path('bookmarks', views.BookMarksView.as_view(), name='bookmarks'),
     path('suggested-users', views.SuggestedUsersView.as_view(), name='suggested-users'),
     path('follow-request/', views.UserFollowView.as_view(), name='user-follow'),
     path('profiles/<int:pk>/follow/delete', views.UserUnfollowView.as_view(), name='user-unfollow'),
@@ -32,6 +31,8 @@ urlpatterns = [
     path('like/<int:tweet_id>/check', views.LikeCheckView.as_view(), name='like-check'),
     # # path('<str:username>/lists', views.ListsView.as_view(), name='lists'),
     path('compose/tweet', views.AddTweetView.as_view(), name='add_tweet'),
+    path('bookmarks', views.BookMarksListView.as_view(), name='bookmarks-list'),
     path('tweets/<int:pk>', views.TweetDetailView.as_view(), name='tweet-detail'),
+    path('tweets/<int:tweet_id>/create-bookmark', views.BookMarksCreateView.as_view(), name='bookmarks-create'),
     path('tweets/<int:tweet_id>/reply', views.ListCreateReplyView.as_view(), name='list-create-reply'),
 ]
