@@ -86,6 +86,10 @@ class BookMarkDeleteView(generics.DestroyAPIView):
     serializer_class = SaveTweetSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_object(self):
+        tweet = get_object_or_404(Tweet, id=self.kwargs.get('tweet_id'))
+        return get_object_or_404(SaveTweet, tweet=tweet, user=self.request.user)
+
     def perform_destroy(self, instance):
         if instance.user == self.request.user :
             return super().perform_destroy(instance)
