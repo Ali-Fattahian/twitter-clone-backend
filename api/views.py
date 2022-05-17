@@ -81,6 +81,17 @@ class BookMarksCreateView(generics.CreateAPIView):
         serializer.save(user=self.request.user, tweet=tweet)
 
 
+class BookMarkDeleteView(generics.DestroyAPIView):
+    queryset = SaveTweet.objects.all()
+    serializer_class = SaveTweetSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_destroy(self, instance):
+        if instance.user == self.request.user :
+            return super().perform_destroy(instance)
+        return Response(status.HTTP_401_UNAUTHORIZED)
+
+
 class SuggestedUsersView(generics.ListAPIView):
     serializer_class = ProfileSerializer
 
