@@ -149,6 +149,14 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     lookup_field = 'username'
 
 
+class TweetListView(generics.ListAPIView):
+    serializer_class = TweetSerializer
+
+    def get_queryset(self):
+        user = get_object_or_404(get_user_model(), username=self.kwargs.get('username'))
+        return Tweet.objects.filter(user=user)
+
+
 class TweetDetailView(generics.RetrieveAPIView):
     queryset = Tweet.objects.all()
     serializer_class = TweetSerializer
