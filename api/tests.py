@@ -1,7 +1,8 @@
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from core.models import Tweet, SaveTweet
+from django.db import IntegrityError
+from core.models import Tweet, SaveTweet, Like
 from users.models import Follow
 
 
@@ -385,3 +386,66 @@ class TestFollowingsListView(APITestCase):
             'username'), new_follow.user.username)
         self.assertEqual(response.data[0].get(
             'email'), new_follow.user.email)
+
+
+class TestCreateLikeView(APITestCase):
+    def setUp(self):
+        self.new_user = get_user_model().objects.create_user(email='test_user@gmail.com', username='test_username',
+                                                             firstname='test_firstname', lastname='test_lastname', password='testpassword', is_active=True)
+        self.new_tweet = Tweet.objects.create(
+            content='test content', user=self.new_user)
+
+    def test_only_auth(self):
+        """Test only authenticated users can send requests to this endpoint"""
+        get_request = self.client.get(
+            reverse('create-like', args=[self.new_tweet.pk]))
+        post_request = self.client.post(
+            reverse('create-like', args=[self.new_tweet.pk]))
+        self.assertEqual(get_request.status_code, 401)
+        self.assertEqual(post_request.status_code, 401)
+
+    def test_auth_users_post_only(self):
+        """Test this endpoint only accepts POST request"""
+        response = self.client.post(reverse('token_obtain_pair'), {
+                                    'email': self.new_user.email, 'password': 'testpassword'})
+        access_token = response.data['access']
+
+        get_response = self.client.get(
+            reverse('create-like', args=[self.new_tweet.pk]), **{'HTTP_AUTHORIZATION': f'JWT {access_token}'})
+        put_response = self.client.put(
+            reverse('create-like', args=[self.new_tweet.pk]), **{'HTTP_AUTHORIZATION': f'JWT {access_token}'})
+        patch_response = self.client.patch(
+            reverse('create-like', args=[self.new_tweet.pk]), **{'HTTP_AUTHORIZATION': f'JWT {access_token}'})
+        delete_response = self.client.delete(
+            reverse('create-like', args=[self.new_tweet.pk]), **{'HTTP_AUTHORIZATION': f'JWT {access_token}'})
+
+        self.assertEqual(get_response.status_code, 405)
+        self.assertEqual(put_response.status_code, 405)
+        self.assertEqual(patch_response.status_code, 405)
+        self.assertEqual(delete_response.status_code, 405)
+
+    def test_auth_user_can_like(self):
+        """Test authenticated users can create a like object"""
+        response = self.client.post(reverse('token_obtain_pair'), {
+                                    'email': self.new_user.email, 'password': 'testpassword'})
+        access_token = response.data['access']
+
+        post_response = self.client.post(reverse(
+            'create-like', args=[self.new_tweet.pk]), **{'HTTP_AUTHORIZATION': f'JWT {access_token}'})
+
+        self.assertEqual(post_response.status_code, 201)
+        self.assertTrue(Like.objects.get(
+            tweet=self.new_tweet, user=self.new_user))
+
+    def test_integrity_error(self):
+        """Test a user is not allowed to like a tweet more than once"""
+        response = self.client.post(reverse('token_obtain_pair'), {
+                                    'email': self.new_user.email, 'password': 'testpassword'})
+        access_token = response.data['access']
+
+        self.client.post(reverse('create-like', args=[self.new_tweet.pk]), **{
+                         'HTTP_AUTHORIZATION': f'JWT {access_token}'})
+
+        with self.assertRaises(IntegrityError):
+            self.client.post(reverse('create-like', args=[self.new_tweet.pk]), **{
+                             'HTTP_AUTHORIZATION': f'JWT {access_token}'})
