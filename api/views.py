@@ -160,7 +160,6 @@ class TweetListView(generics.ListAPIView):
 class TweetDetailView(generics.RetrieveAPIView):
     queryset = Tweet.objects.all()
     serializer_class = TweetSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class AddTweetView(generics.CreateAPIView):
