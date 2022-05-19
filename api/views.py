@@ -5,18 +5,57 @@ from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta, timezone
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+import jwt
+from django.conf import settings
+from django.contrib.auth.hashers import make_password
 # from django.db.models import Q
 
 from .serializers import LikeSerializer, UserSignUpSerializer, TweetSerializer, SaveTweetSerializer, ProfileSerializer, FollowSerializer, ReplySerializer
 from core.models import Tweet, SaveTweet, Like, Reply
 from users.models import Follow
-from .utils import OnlySameUserCanEditMixin
+from .utils import OnlySameUserCanEditMixin, EmailRelatedClass
 
 
-
-class SignUpView(generics.CreateAPIView):
-    queryset = get_user_model().objects.all()
+class SignUpView(generics.GenericAPIView):
     serializer_class = UserSignUpSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.validated_data['password'] = make_password(serializer.validated_data['password'])
+        serializer.save()
+        user = get_object_or_404(
+            get_user_model(), email=serializer.data.get('email'))
+        token = RefreshToken.for_user(user).access_token
+        current_site = get_current_site(request).domain
+        relative_link = reverse('verify-email')
+        absolute_url = f'http://{current_site}{relative_link}?token={str(token)}'
+        email_body = f'Hi {user.username}, Welcome to Twitter Clone, Please use the link below to verify your email.\n{absolute_url}'
+
+        data = {'email_body': email_body,
+                'email_subject': 'Verify your email', 'to_email': user.email}
+        EmailRelatedClass.send_email(data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class VerifyEmail(generics.GenericAPIView):
+    def get(self, request):
+        token = request.GET.get('token')
+        try:
+            payload = jwt.decode(
+                token, settings.SECRET_KEY, algorithms='HS256')
+            user = get_object_or_404(get_user_model(), id=payload['user_id'])
+            if not user.is_active:
+                user.is_active = True
+                user.save()
+            return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
+        except jwt.ExpiredSignatureError:
+            return Response({'error': 'Activation expired'}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.exceptions.DecodeError:
+            return Response({'error: Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class HomePageView(generics.ListCreateAPIView):
@@ -91,7 +130,7 @@ class BookMarkDeleteView(generics.DestroyAPIView):
         return get_object_or_404(SaveTweet, tweet=tweet, user=self.request.user)
 
     def perform_destroy(self, instance):
-        if instance.user == self.request.user :
+        if instance.user == self.request.user:
             return super().perform_destroy(instance)
         return Response(status.HTTP_401_UNAUTHORIZED)
 
@@ -135,10 +174,11 @@ class FollowCheckView(generics.RetrieveAPIView):
     queryset = Follow.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FollowSerializer
-    
+
     def get_object(self):
         following_username = self.kwargs.get('username')
-        following_user = get_object_or_404(get_user_model(), username=following_username)
+        following_user = get_object_or_404(
+            get_user_model(), username=following_username)
         return get_object_or_404(Follow, user=following_user, follower=self.request.user)
 
 
@@ -153,7 +193,8 @@ class TweetListView(generics.ListAPIView):
     serializer_class = TweetSerializer
 
     def get_queryset(self):
-        user = get_object_or_404(get_user_model(), username=self.kwargs.get('username'))
+        user = get_object_or_404(
+            get_user_model(), username=self.kwargs.get('username'))
         return Tweet.objects.filter(user=user)
 
 
@@ -196,6 +237,7 @@ class FollowingsListView(generics.ListAPIView):
             followings.append(following_obj.user)
         return followings
 
+
 class CreateLikeView(generics.CreateAPIView):
     queryset = Like.objects.all()
     serializer_class = LikeSerializer
@@ -219,7 +261,7 @@ class DeleteLikeView(generics.DestroyAPIView):
 
 class ListLikeView(generics.ListAPIView):
     serializer_class = LikeSerializer
-    
+
     def get_queryset(self):
         tweet = get_object_or_404(Tweet, id=self.kwargs.get('tweet_id'))
         return Like.objects.filter(tweet=tweet)
@@ -229,21 +271,20 @@ class LikeCheckView(generics.RetrieveAPIView):
     queryset = Like.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = LikeSerializer
-    
+
     def get_object(self):
         tweet_id = self.kwargs.get('tweet_id')
         tweet = get_object_or_404(Tweet, id=tweet_id)
-        return get_object_or_404(Like, user=self.request.user, tweet=tweet)   
+        return get_object_or_404(Like, user=self.request.user, tweet=tweet)
 
 
 class ListCreateReplyView(generics.ListCreateAPIView):
-    serializer_class = ReplySerializer     
+    serializer_class = ReplySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         tweet = get_object_or_404(Tweet, id=self.kwargs.get('tweet_id'))
         return Reply.objects.filter(tweet=tweet)
-
 
     def perform_create(self, serializer):
         tweet = get_object_or_404(Tweet, id=self.kwargs.get('tweet_id'))
@@ -254,7 +295,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-
 
         token['username'] = user.username
         # ...

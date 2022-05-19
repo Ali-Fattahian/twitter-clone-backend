@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from django.core.mail import EmailMessage
 
 
 # only the user has access to edit-profile page specific to that user
@@ -46,3 +47,12 @@ def datetime_subtractor(new_datetime, old_datetime):
         answer['seconds'] = 0
 
     return answer
+
+
+class EmailRelatedClass:
+    @staticmethod
+    def send_email(data):
+        email = EmailMessage(
+            subject=data['email_subject'], body=data['email_body'], to=[data['to_email']])
+
+        email.send()
