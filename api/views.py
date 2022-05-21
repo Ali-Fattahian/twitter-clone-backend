@@ -11,12 +11,22 @@ from django.urls import reverse
 import jwt
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
+import threading
 # from django.db.models import Q
 
 from .serializers import LikeSerializer, UserSignUpSerializer, TweetSerializer, SaveTweetSerializer, ProfileSerializer, FollowSerializer, ReplySerializer
 from core.models import Tweet, SaveTweet, Like, Reply
 from users.models import Follow
 from .utils import OnlySameUserCanEditMixin, EmailRelatedClass
+
+
+class EmailThreading(threading.Thread):
+    def __init__(self, data) :
+        self.email = data
+        threading.Thread.__init__(self)
+    
+    def run(self):
+        EmailRelatedClass.send_email(self.email)
 
 
 class SignUpView(generics.GenericAPIView):
@@ -37,7 +47,7 @@ class SignUpView(generics.GenericAPIView):
 
         data = {'email_body': email_body,
                 'email_subject': 'Verify your email', 'to_email': user.email}
-        EmailRelatedClass.send_email(data)
+        EmailThreading(data).start()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
