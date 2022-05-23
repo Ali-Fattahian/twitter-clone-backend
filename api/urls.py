@@ -38,4 +38,6 @@ urlpatterns = [
     path('tweets/<int:pk>', views.TweetDetailView.as_view(), name='tweet-detail'),
     path('tweets/<int:tweet_id>/create-bookmark', views.BookMarksCreateView.as_view(), name='bookmarks-create'),
     path('tweets/<int:tweet_id>/reply', views.ListCreateReplyView.as_view(), name='list-create-reply'),
+    path('check-email/', views.CheckEmailExists.as_view(), name='check-email'),
+    path('check-username/', views.CheckUsernameExists.as_view(), name='check-username'),
 ]

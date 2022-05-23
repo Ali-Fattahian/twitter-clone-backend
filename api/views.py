@@ -67,6 +67,22 @@ class VerifyEmail(generics.GenericAPIView):
         except jwt.exceptions.DecodeError:
             return Response({'error: Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
+    
+class CheckEmailExists(generics.GenericAPIView):
+    def post(self, request):
+        email = request.data.get('email')
+        if get_user_model().objects.filter(email=email).exists():
+            return Response(True, status=status.HTTP_200_OK)
+        return Response(False, status=status.HTTP_200_OK)
+
+
+class CheckUsernameExists(generics.GenericAPIView):
+    def post(self, request):
+        username = request.data.get('username')
+        if get_user_model().objects.filter(username=username).exists():
+            return Response(True, status=status.HTTP_200_OK)
+        return Response(False, status=status.HTTP_200_OK)
+
 
 class HomePageView(generics.ListCreateAPIView):
     serializer_class = TweetSerializer
