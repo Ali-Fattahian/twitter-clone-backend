@@ -55,4 +55,4 @@ class EmailRelatedClass:
         email = EmailMessage(
             subject=data['email_subject'], body=data['email_body'], to=[data['to_email']])
 
-        email.send()
+        email.send(fail_silently=True)

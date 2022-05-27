@@ -449,3 +449,47 @@ class TestCreateLikeView(APITestCase):
         with self.assertRaises(IntegrityError):
             self.client.post(reverse('create-like', args=[self.new_tweet.pk]), **{
                              'HTTP_AUTHORIZATION': f'JWT {access_token}'})
+
+
+class TestEmailExistsView(APITestCase):
+    def setUp(self):
+        self.new_user = get_user_model().objects.create_user(email='test_user@gmail.com', username='test_username',
+                                                             firstname='test_firstname', lastname='test_lastname', password='testpassword', is_active=True)
+
+    def test_returns_true_if_exists(self):
+        """Test if it returns true for new_user email"""
+        response = self.client.post(reverse('check-email'), {
+            'email': self.new_user.email
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, True)
+
+    def test_returns_false_if_not_exist(self):
+        """Test if this endpoint returns false if the user does not exist"""
+        response = self.client.post(reverse('check-email'), {
+            'email': 'aabbccdd@gmail.com'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, False)
+
+
+class TestUsernameExistsView(APITestCase):
+    def setUp(self):
+        self.new_user = get_user_model().objects.create_user(email='test_user@gmail.com', username='test_username',
+                                                             firstname='test_firstname', lastname='test_lastname', password='testpassword', is_active=True)
+
+    def test_returns_true_if_exists(self):
+        """Test if it returns true for new_user email"""
+        response = self.client.post(reverse('check-username'), {
+            'username': self.new_user.username
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, True)
+
+    def test_returns_false_if_not_exist(self):
+        """Test if this endpoint returns false if the user does not exist"""
+        response = self.client.post(reverse('check-username'), {
+            'username': 'not_exist'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, False)
