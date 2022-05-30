@@ -42,6 +42,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     bio = models.TextField(_('bio'), max_length=255, blank=True, default='')
     picture = models.ImageField(
         blank=True, default='profile_pictures/default_profile.png')
+    background_picture = models.ImageField(blank=True, default='profile_pictures/default_background_picture.png')
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
 

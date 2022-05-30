@@ -36,7 +36,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ('id', 'email', 'username', 'firstname', 'lastname',
-                  'bio', 'join_date', 'picture', 'date_joined', 'tweet_number', 'follows')
+                  'bio', 'join_date', 'picture', 'date_joined', 'tweet_number', 'follows', 'background_picture')
 
 
 class UserSignUpSerializer(serializers.ModelSerializer):
