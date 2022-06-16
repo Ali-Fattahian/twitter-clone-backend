@@ -12,7 +12,6 @@ import jwt
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
 import threading
-# from django.db.models import Q
 
 from .serializers import LikeSerializer, UserSignUpSerializer, TweetSerializer, SaveTweetSerializer, ProfileSerializer, FollowSerializer, ReplySerializer
 from core.models import Tweet, SaveTweet, Like, Reply
@@ -165,17 +164,16 @@ class SuggestedUsersView(generics.ListAPIView):
     serializer_class = ProfileSerializer
 
     def get_queryset(self):
-        # if self.request.user.is_authenticated:
-        #     followings = self.request.user.follows
-        #     print(followings)
-        # follows = Follow.objects.filter(~Q(follower=self.request.user)) # request.user is not the follower
-        # users = get_user_model().objects.filter(~Q(self.request.user__in=followers))
-        # suggests = []
-        # for follow in follows:
-        #     suggests.append(follow.user)
-        # print(suggests)
-        # return print(get_user_model().objects.exclude(user__in=followings)[:3])
-
+        if self.request.user.is_authenticated:
+            followings = []
+            followings.append(self.request.user.username)
+            follow_objs = Follow.objects.filter(follower=self.request.user)
+            for follow_obj in follow_objs:
+                followings.append(follow_obj.user.username)
+            suggested_users = get_user_model().objects.exclude(username__in=followings)
+            if len(suggested_users) >3:
+                return suggested_users[:3]
+            return suggested_users
         return get_user_model().objects.all()[:3]
 
 
