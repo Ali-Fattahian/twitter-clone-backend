@@ -206,7 +206,7 @@ class FollowCheckView(generics.RetrieveAPIView):
         return get_object_or_404(Follow, user=following_user, follower=self.request.user)
 
 
-class ProfileView(generics.RetrieveUpdateAPIView):
+class ProfileDetailView(generics.RetrieveUpdateAPIView):
     queryset = get_user_model().objects.all()
     permission_classes = [OnlySameUserCanEditMixin]
     serializer_class = ProfileSerializer
