@@ -62,7 +62,7 @@ class FollowSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'follower')
 
 class TweetSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')
+    user = ProfileSerializer()
     firstname = serializers.ReadOnlyField(source='user.firstname')
     lastname = serializers.ReadOnlyField(source='user.lastname')
     likes = LikeSerializer(many=True, read_only=True)
