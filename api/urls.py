@@ -35,6 +35,7 @@ urlpatterns = [
     path('compose/tweet', views.AddTweetView.as_view(), name='add_tweet'),
     path('bookmarks', views.BookMarksListView.as_view(), name='bookmarks-list'),
     path('bookmarks/<int:tweet_id>/delete', views.BookMarkDeleteView.as_view(), name='bookmark-delete'),
+    path('bookmarks/<int:tweet_id>/check', views.BookMarkCheckView.as_view(), name='bookmark-check'),
     path('tweets/<int:pk>', views.TweetDetailView.as_view(), name='tweet-detail'),
     path('tweets/<int:tweet_id>/create-bookmark', views.BookMarksCreateView.as_view(), name='bookmarks-create'),
     path('tweets/<int:tweet_id>/reply', views.ListCreateReplyView.as_view(), name='list-create-reply'),

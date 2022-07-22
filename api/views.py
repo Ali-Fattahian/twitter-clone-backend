@@ -160,6 +160,16 @@ class BookMarkDeleteView(generics.DestroyAPIView):
         return Response(status.HTTP_401_UNAUTHORIZED)
 
 
+class BookMarkCheckView(generics.RetrieveAPIView):
+    queryset = SaveTweet.objects.all()
+    serializer_class = SaveTweetSerializer
+
+    def get_object(self):
+        tweet = get_object_or_404(Tweet, id=self.kwargs.get('tweet_id'))
+        return get_object_or_404(SaveTweet, tweet=tweet, user=self.request.user)
+
+
+
 class SuggestedUsersView(generics.ListAPIView):
     serializer_class = ProfileSerializer
 
