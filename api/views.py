@@ -196,12 +196,23 @@ class UserFollowView(generics.CreateAPIView):
         serializer.save(follower=self.request.user)
 
 
-class UserUnfollowView(generics.DestroyAPIView):
+class UserUnfollowWithIdView(generics.DestroyAPIView):
     serializer_class = FollowSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return Follow.objects.filter(follower=self.request.user)
+
+
+class UserUnfollowWithUsernameView(generics.DestroyAPIView):
+    queryset = Follow.objects.all()
+    serializer_class = FollowSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        following_user = get_object_or_404(get_user_model(), username=self.kwargs.get('username'))
+        print(following_user)
+        return get_object_or_404(Follow, user=following_user, follower=self.request.user)
 
 
 class FollowCheckView(generics.RetrieveAPIView):
