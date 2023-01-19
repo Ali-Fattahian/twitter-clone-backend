@@ -121,8 +121,8 @@ class UserListSearchResults(generics.ListAPIView):
 
 class ExploreView(generics.ListAPIView):
     serializer_class = TweetSerializer
-    now = datetime.now(timezone.utc)
-    yesterday = now - timedelta(days=1)
+    # now = datetime.now(timezone.utc)
+    # yesterday = now - timedelta(days=1)
     # queryset = Tweet.objects.filter(date_created__gte=yesterday) # Show the tweets from the last 24 hours -- not worth it for a small website
     queryset = Tweet.objects.all().order_by('-date_created')[:20]
 
