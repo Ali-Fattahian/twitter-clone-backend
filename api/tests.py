@@ -493,3 +493,55 @@ class TestUsernameExistsView(APITestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, False)
+
+
+class TestSuggestedUsersView(APITestCase):
+    def setUp(self):
+        self.new_user_1 = get_user_model().objects.create_user(email='test_user1@gmail.com',
+                                                                username='test_username1',
+                                                               firstname='test_firstname',
+                                                               lastname='test_lastname',
+                                                               password='testpassword', 
+                                                               is_active=True)
+        self.new_user_2 = get_user_model().objects.create_user(email='test_user2@gmail.com',
+                                                                username='test_username2',
+                                                                firstname='test_firstname',
+                                                                lastname='test_lastname',
+                                                                password='testpassword', 
+                                                                is_active=True)
+        self.new_user_3 = get_user_model().objects.create_user(email='test_user3@gmail.com',
+                                                                username='test_username3',
+                                                               firstname='test_firstname',
+                                                               lastname='test_lastname',
+                                                               password='testpassword', 
+                                                               is_active=True)
+        Follow.objects.create(user=self.new_user_2, follower=self.new_user_1) # user 1 follows user 2
+
+        response = self.client.post(reverse('token_obtain_pair'), {
+                                    'email': self.new_user_1.email, 'password': 'testpassword'})
+        access_token = response.data['access']
+        self.headers = {'HTTP_AUTHORIZATION': f'JWT {access_token}'}
+
+    def test_suggested_users_route(self):
+        """Test SuggestedUsers endpoint"""
+        response = self.client.get(reverse('suggested-users'), **self.headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_suggested_users_no_auth(self):
+        """Accessing the endpoint without access_token should return all three users"""
+        response = self.client.get(reverse('suggested-users'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 3)
+        self.assertEqual(response.json()[0]['email'], self.new_user_1.email)
+        self.assertEqual(response.json()[0]['username'], self.new_user_1.username)
+        self.assertEqual(response.json()[1]['email'], self.new_user_2.email)
+        self.assertEqual(response.json()[1]['username'], self.new_user_2.username)
+        self.assertEqual(response.json()[2]['email'], self.new_user_3.email)
+        self.assertEqual(response.json()[2]['username'], self.new_user_3.username)
+
+    def test_suggested_users_auth(self):
+        """Test the result of suggested users endpoint for an authenticated user"""
+        response = self.client.get(reverse('suggested-users'), **self.headers)
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.json()[0]['email'], self.new_user_3.email)
+        self.assertEqual(response.json()[0]['username'], self.new_user_3.username)
