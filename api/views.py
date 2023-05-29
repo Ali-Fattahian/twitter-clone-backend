@@ -2,7 +2,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, filters, status
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from datetime import datetime, timedelta, timezone
+from django.core.exceptions import ValidationError
+# from datetime import datetime, timedelta, timezone
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -232,6 +233,16 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
     permission_classes = [OnlySameUserCanEditMixin]
     serializer_class = ProfileSerializer
     lookup_field = 'username'
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        password = self.request.data.get('password', None)
+        if password:
+            if len(password) < 4:
+                raise ValidationError(
+                    {'detail': 'Password can\'t be less than 4 characters long'})
+            instance.set_password(password)
+            instance.save()
 
 
 class TweetListView(generics.ListAPIView):
