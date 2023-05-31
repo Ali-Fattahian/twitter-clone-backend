@@ -53,6 +53,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f'Username: {self.username} | Email: {self.email}'
 
+    class Meta(AbstractBaseUser.Meta):
+        verbose_name_plural = 'Users'
+        verbose_name = 'User'
+
 
 class Follow(models.Model):
     user = models.ForeignKey(

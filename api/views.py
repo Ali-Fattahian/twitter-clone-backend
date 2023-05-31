@@ -41,8 +41,8 @@ class SignUpView(generics.GenericAPIView):
             get_user_model(), email=serializer.data.get('email'))
         token = RefreshToken.for_user(user).access_token
         current_site = get_current_site(request).domain
-        relative_link = reverse('verify-email')
-        absolute_url = f'http://{current_site}{relative_link}?token={str(token)}'
+        # relative_link = reverse('verify-email')
+        absolute_url = f'https://{current_site}/#/activate-account/{token}'
         email_body = f'Hi {user.username}, Welcome to Twitter Clone, Please use the link below to verify your email.\n{absolute_url}'
 
         data = {'email_body': email_body,
@@ -238,9 +238,9 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
         instance = self.get_object()
         password = self.request.data.get('password', None)
         if password:
-            if len(password) < 4:
+            if len(password) < 8:
                 raise ValidationError(
-                    {'detail': 'Password can\'t be less than 4 characters long'})
+                    {'detail': 'Password can\'t be less than 8 characters long'})
             instance.set_password(password)
             instance.save()
 

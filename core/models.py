@@ -46,6 +46,7 @@ class Reply(models.Model):
 
     class Meta:
         ordering = ['-id']
+        verbose_name_plural = 'Replies'
 
 # class Retweet()
 
@@ -61,6 +62,7 @@ class SaveTweet(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'tweet'], name='You can\'t save the same post more than once'),
         ]
+        verbose_name_plural = 'Save Tweets'
 
     def __str__(self):
         return f'{self.user.username} saved {self.tweet.id} tweet by {self.tweet.user.username}'
