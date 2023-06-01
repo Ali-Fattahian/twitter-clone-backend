@@ -181,7 +181,7 @@ class SuggestedUsersView(generics.ListAPIView):
             follow_objs = Follow.objects.filter(follower=self.request.user)
             for follow_obj in follow_objs:
                 followings.append(follow_obj.user.username)
-            suggested_users = get_user_model().objects.exclude(username__in=followings)
+            suggested_users = get_user_model().objects.exclude(username__in=followings).exclude(is_active=False)
             if len(suggested_users) >3:
                 return suggested_users[:3]
             return suggested_users
