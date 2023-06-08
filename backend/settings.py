@@ -15,6 +15,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'twitter-clone-oo6z.onrender.com']
+CORS_ALLOWED_ORIGINS = ['*']
 
 
 INSTALLED_APPS = [
@@ -48,10 +49,6 @@ MIDDLEWARE = [
 ]
 
 CORS_ORIGIN_ALLOW_ALL = False
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8000',
-    'https://twitter-clone-oo6z.onrender.com'
-]
 
 ROOT_URLCONF = 'backend.urls'
 
