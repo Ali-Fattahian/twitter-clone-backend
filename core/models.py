@@ -42,7 +42,7 @@ class Reply(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'reply to {self.tweet.user.username} tweet by {self.user.username}'
+        return f'reply to {self.tweet.user.username}\'s tweet by {self.user.username}'
 
     class Meta:
         ordering = ['-id']
