@@ -74,12 +74,19 @@ either remove cloudinary settings and apps from installed_apps or set the config
 
 once you did all of that,
 
+```sh
+python manage.py makemigrations
+python manage.py migrate
+```
+
+To create the tables in your database.
+
+
 ```ssh
 python manage.py runserver
 ```
 
 to run the server.
-
 You can navigate to
 `http://localhost:8000/api/`
 to access the api routes
